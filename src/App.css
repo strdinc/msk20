@@ -11,7 +11,12 @@
         flex-wrap: wrap;
         gap: 68px;
         justify-content: flex-start;
-        align-items: flex-start;  /* чтобы выравнивать карточки по верхнему краю */
+        align-items: flex-start;
+    }
+
+    .header {
+        width: 100vw;
+        height: 100px;
     }
 }
 
@@ -26,7 +31,6 @@
     .cards-grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
         justify-content: flex-start;
         align-items: flex-start;  /* чтобы выравнивать карточки по верхнему краю */
     }
