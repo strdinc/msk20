@@ -25,8 +25,8 @@ const Weather = ({ lat, lon }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // URL для Open-Meteo API
-    const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m&timezone=Europe%2FMoscow`;
+    // URL для Open-Meteo API с добавлением precipitation_probability
+    const WEATHER_URL = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&hourly=temperature_2m,precipitation_probability&timezone=Europe%2FMoscow`;
 
     useEffect(() => {
         const fetchWeather = async () => {
@@ -46,6 +46,7 @@ const Weather = ({ lat, lon }) => {
                 const hourlyData = hourly.time.slice(0, 24).map((time, index) => ({
                     time: new Date(time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
                     temp: hourly.temperature_2m[index],
+                    precipitation: hourly.precipitation_probability[index],
                 }));
                 setHourlyWeather(hourlyData);
             } catch (err) {
@@ -63,11 +64,21 @@ const Weather = ({ lat, lon }) => {
         labels: hourlyWeather.map(data => data.time),
         datasets: [
             {
-                zIndex: 9000,
+                label: 'Температура (°C)',
                 data: hourlyWeather.map(data => data.temp),
                 fill: false,
                 borderColor: '#36A2EB',
                 backgroundColor: '#36A2EB',
+                yAxisID: 'y-temp',
+                tension: 0.4,
+            },
+            {
+                label: 'Вероятность осадков (%)',
+                data: hourlyWeather.map(data => data.precipitation),
+                fill: false,
+                borderColor: '#FF6384',
+                backgroundColor: '#FF6384',
+                yAxisID: 'y-precipitation',
                 tension: 0.4,
             },
         ],
@@ -79,7 +90,20 @@ const Weather = ({ lat, lon }) => {
             legend: { position: 'top' },
         },
         scales: {
-            y: { title: { display: true, text: 'Температура (°C)' } },
+            'y-temp': {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: { display: true, text: 'Температура (°C)' },
+            },
+            'y-precipitation': {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                title: { display: true, text: 'Вероятность осадков (%)' },
+                grid: { drawOnChartArea: false }, // Убираем сетку для второй оси
+                suggestedMax: 100, // Максимум 100% для вероятности осадков
+            },
             x: { title: { display: true, text: 'Время' } },
         },
     };
@@ -88,7 +112,7 @@ const Weather = ({ lat, lon }) => {
     if (error) return <div className="text-center text-red-500">{error}</div>;
 
     return (
-        <div>
+        <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
             {/* Текущая погода */}
             {currentWeather && (
                 <div className="flex items-center mb-4">
